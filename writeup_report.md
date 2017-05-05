@@ -162,8 +162,8 @@ I introduced in the pipeline 4 parameters to minimize the false positive and smo
 
 | parameter        | defition   | value|
 |:-------------:|:-------------:|:-----------:|
-|frames_to_average |frame count to average the heat|10|
-|frames_to_validate |frame count to validate, i.e. the video shall detect amount  of cars consectively to decide a new car is detected.|10|
+|frames_to_average |frame count to average the heat|5|
+|frames_to_validate |frame count to validate, i.e. the video shall detect amount  of cars consectively to decide a new car is detected.|5|
 |recognition_rate | the cars are only detected under certain scales. By observing the samples, 2 out of 6 scales patches are detected in average| 2|
 
 With current SVM classifier, it performs bad when there is shadow of tree on the road, mainly the projection of leaves. But they are irregular and shapes changes quickly.
