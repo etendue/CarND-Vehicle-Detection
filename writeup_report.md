@@ -39,7 +39,7 @@ You're reading it!
 
 #### 1. Explain how (and identify where in your code) you extracted HOG features from the training images.
 
-The code for this step is contained in the **3rd code cell** of the IPython notebook `project5.ipynb` with function name `get_hog_features`.  
+The code for this step is contained in the **3rd code cell** of the IPython notebook `project5.ipynb` with function name `get_hog_features()`.  
 
 I picked randomly some samples from  `vehicle` and `non-vehicle` images.  Here is an example of one of each of the `vehicle` and `non-vehicle` classes:
 
@@ -47,7 +47,7 @@ I picked randomly some samples from  `vehicle` and `non-vehicle` images.  Here i
 
 `skimage.hog()` function accepts image with one channel. In order to explore different color channels, the `skimage.hog()` function needs to be called multiple times and features needs to be concatenated.
 
-In later stage I tried different parameter combinations (`orient`, `pixels_per_cell`, and `cells_per_block`) with different color space. I grabbed random images from each of the two classes and displayed them to get a feel for what the `skimage.hog()` output looks like.
+In later stage I tried different parameter combinations (`orient`, `pixels_per_cell`, and `cells_per_block`) with different `color space`. I grabbed randomly images from each of the two classes and displayed them to get a feel for what the `skimage.hog()` output looks like.
 
 Here is an example using the `Grayscale` color space and HOG parameters of `orientations=9`, `pixels_per_cell=(8, 8)` and `cells_per_block=(2, 2)`:
 
@@ -79,11 +79,11 @@ im comparision to
 I tried RGB, HLS, YCrCB, YUV separately. And here are the experience with those:
 
     * RGB worked well in test_image in lesson video but turned out bad in this project 
-    * S channel of HLS is supposed to be stable feature against lightness, but saturation is not the feature for cars vs non cars
+    * S channel of HLS is supposed to be stable feature against lightness, but saturation is not a particular marker for distinguishing cars vs non cars
     * YCrCB(I haven't heard before) and just tried out
     * YUV with Y channel - recommend by some other students
 
-The final result is preferred the YUV with Y channel, although still not perfect. 
+The final result is preferred with  `YUV color space` with Y channel, although still not perfect. 
 
 
 #### 3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
@@ -110,7 +110,7 @@ I got a **98.6%** accuracy for classification.
 #### 1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
 
 Since the targets (cars) are scattered in the image captured from camera, to identify them by using the classifier, the image has to be splitted to small patches and resized to 64x64 size.
-Function `slide_window` in **code cell 9**  is used to get all small rectangle patches by sliding the patch window from left to right, top to bottom on a image.
+Function `slide_window` in **code cell 11**  is used to get all small rectangle patches by sliding the patch window from left to right, top to bottom on a image.
 The `overlap` rate is used to calculate the stride/step size for sliding. The cars appear in different sizes in real 3D scene, therefore the `xy_window` is the patch window size. The ratio:
   
   * scale = xy_window[0]/64
@@ -122,14 +122,14 @@ Following image shows the applied the strategy for searching cars in area of int
 
 ![alt text][image4]
 
-In final step I fixed the `overlap`ratio to be **75%** in function `find_cars()` in **code cell 11**. In this function (reference code from lesson) optimizes the HOG features extraction.
+In final step I fixed the `overlap` ratio to be **75%** in function `find_cars()` in **code cell 13**. This function (reference code from lesson) optimizes the HOG features extraction.
 Instead to apply `hog()` on each patch window, the`hog()`is called once on the whole image and HOG feature vector is segmented according to patch size. The color features extraction is still done
  on every patch.
 
 
 #### 2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
 
-Ultimately I searched on two scales using YUV Y-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result.  
+Ultimately I searched on **six** scales using YUV Y-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result.  
 Here are the parameters I adjust for the `find_cars` function:
 
 | parameter        | defition   | value|
@@ -158,7 +158,7 @@ Here's a [link to project video result](./project_video_output.mp4), the video c
 
 #### 2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
 
-I introduced in the pipeline 4 parameters to minimize the false positive and smoothing the bounding box moving (**see code cell TODO** )
+I introduced in the pipeline 4 parameters to minimize the false positive and smoothing the bounding box moving (**see code cell 18** )
 
 | parameter        | defition   | value|
 |:-------------:|:-------------:|:-----------:|
@@ -171,9 +171,11 @@ In function `validate_labels()`, I count the detected cars and compare to previo
 `frames_to_validate` the counts of cars are checked if they remain the constant value, it is considered to be new labels. In case of trees, the hot positive is filtered out due to the irregularity 
 of detected count.
 
+In function `multi_scale_find_cars_pipeline()` (**code cell 19** ). I recorded the positions of positive detections in each frame of the video by using multiple scales (6 scales in total) search method and 
+use `add_heat()` to create a heatmap and  accumulate the result from different scales. Further more
+ I also accumulate the "heatmapped" region from previous frames (parameter **frames_to_average** defines the size of this time window).
 
-I recorded the positions of positive detections in each frame of the video.  From the positive detections I created a heatmap and then thresholded that map to identify vehicle positions. 
- I then used `scipy.ndimage.measurements.label()` to identify individual blobs in the heatmap.  I then assumed each blob corresponded to a vehicle.  I constructed bounding boxes to cover the area of each blob detected.  
+Finally I  thresholded that map to identify vehicle positions. I then used `scipy.ndimage.measurements.label()` to identify individual blobs in the heatmap.  I then assumed each blob corresponded to a vehicle.  I constructed bounding boxes to cover the area of each blob detected.  
 
 Here's an example result showing the heatmap from a series of frames of video, the result of `scipy.ndimage.measurements.label()` and the bounding boxes then overlaid on the last frame of video:
 
